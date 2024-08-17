@@ -1,4 +1,4 @@
-//* este es el headerpage con la vista de expedientes */
+
 
 <main className="flex-1 h-screen flex flex-col items-center justify-center p-6 bg-gray-100">
   {/* Contenedor principal */}
@@ -114,8 +114,6 @@
     </div>
   </div>
 </main>
-
-
 
 
 /*solo hay que ir cambiando lo que esta dentro del main contenedor principal */
