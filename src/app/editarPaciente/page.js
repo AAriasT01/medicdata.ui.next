@@ -4,24 +4,27 @@ import { useState } from "react";
 import Head from "next/head";
 
 import { DocumentIcon } from "@heroicons/react/outline";
-import Headerpages from "@/components/headerpages";
+import Headerpages from "@/components/headerpagescopy";
 import Sidemenu from "@/components/sidemenu";
 
-
 export default function Pagina() {
+  const [fecha, setFecha] = useState("");
+
+  // Obtener la fecha actual en el formato YYYY-MM-DD
+  const today = new Date();
+  const formattedToday = today.toISOString().split("T")[0]; // 'YYYY-MM-DD'
 
   return (
     <div>
-      {/* Barra de menú superior (1) - Posición fija */}
+      {/* Barra de menú superior- Posición fija */}
       <div className="fixed top-0 left-0 w-full h-16 bg-gray-800 text-white z-10">
-        <Headerpages/>
+        <Headerpages />
       </div>
 
-
-      {/* <!-- Contenedor principal (2) para el menú vertical (3) y el contenido de los videos (4) --> */}
+      {/* <!-- Contenedor principal para el menú vertical y el contenido  --> */}
       <div className="flex pt-16">
-        {/* <!-- Menú vertical (3) - Oculto en pantallas pequeñas, visible en medianas y grandes --> */}
-       <Sidemenu/>
+        {/* <!-- Menú vertical - Oculto en pantallas pequeñas, visible en medianas y grandes --> */}
+        <Sidemenu />
 
         {/* <!-- Contenido--> */}
         <div className="flex-grow  h-auto bg-slate-50 p-4 md:ml-64">
@@ -72,15 +75,13 @@ export default function Pagina() {
                       </label>
                     </div>
                     <div className="flex space-x-2">
-                      <select className="px-4 py-2 border rounded focus:outline-none focus:border-purple-600">
-                        <option>Año</option>
-                      </select>
-                      <select className="px-4 py-2 border rounded focus:outline-none focus:border-purple-600">
-                        <option>Mes</option>
-                      </select>
-                      <select className="px-4 py-2 border rounded focus:outline-none focus:border-purple-600">
-                        <option>Día</option>
-                      </select>
+                      <input
+                        type="date"
+                        value={fecha}
+                        onChange={(e) => setFecha(e.target.value)}
+                        className="w-full px-4 py-2 border rounded focus:outline-none focus:border-purple-600"
+                        max={formattedToday} // Establece la fecha máxima a hoy
+                      />
                     </div>
                     <select className="w-full px-4 py-2 border rounded focus:outline-none focus:border-purple-600">
                       <option>O+</option>

@@ -1,14 +1,33 @@
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable @next/next/no-img-element */
 "use client"; // Marcar este archivo como un Client Component
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { DocumentIcon } from "@heroicons/react/outline";
-import Headerpages from "@/components/headerpages";
+import Headerpages from "@/components/headerpagescopy";
 import Sidemenu from "@/components/sidemenu";
+import { GetExpedientes } from "@/services/expedientes";
 
 export default function Pagina() {
+  const [expedientes, setExpedientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExpedientes = async () => {
+      try {
+        const data = await GetExpedientes();
+        setExpedientes(data);
+      } catch (error) {
+        console.error("Error fetching expedientes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpedientes();
+  }, []);
+
   return (
     <div>
       {/* Barra de menú superior (1) - Posición fija */}
@@ -16,16 +35,16 @@ export default function Pagina() {
         <Headerpages />
       </div>
 
-      {/* <!-- Contenedor principal (2) para el menú vertical (3) y el contenido de los videos (4) --> */}
+      {/* Contenedor principal (2) para el menú vertical (3) y el contenido de los videos (4) */}
       <div className="flex pt-16">
-        {/* <!-- Menú vertical (3) - Oculto en pantallas pequeñas, visible en medianas y grandes --> */}
+        {/* Menú vertical (3) - Oculto en pantallas pequeñas, visible en medianas y grandes */}
         <Sidemenu />
 
-        {/* <!-- Contenido--> */}
-        <div className="flex-grow  h-auto bg-slate-50 p-4 md:ml-64">
+        {/* Contenido */}
+        <div className="flex-grow h-auto bg-slate-50 p-4 md:ml-64">
           <main className="flex-1 h-screen flex flex-col items-center justify-center p-6 bg-gray-100">
             {/* Contenedor principal */}
-            <div className="w-full h-full  p-4 bg-white rounded-md shadow-md flex flex-col justify-between">
+            <div className="w-full h-full p-4 bg-white rounded-md shadow-md flex flex-col justify-between">
               <div>Expedientes</div>
               {/* Div superior con botón y barra de búsqueda */}
               <div className="w-full flex justify-between items-center mb-4">
@@ -85,75 +104,68 @@ export default function Pagina() {
 
               {/* Div con la tabla */}
               <div className="w-full flex-1 bg-white p-4 border rounded-md overflow-x-auto">
-                <table className="min-w-full bg-white">
-                  <thead>
-                    <tr>
-                      <th className="py-2 px-4 border-b">Nombres</th>
-                      <th className="py-2 px-4 border-b">Apellidos</th>
-                      <th className="py-2 px-4 border-b">Número de Citas</th>
-                      <th className="py-2 px-4 border-b">
-                        Fecha Última Consulta
-                      </th>
-                      <th className="py-2 px-4 border-b">
-                        Último Diagnóstico / Enfermedad
-                      </th>
-                      <th className="py-2 px-4 border-b">Edad</th>
-                      <th className="py-2 px-4 border-b">Teléfono</th>
-                      <th className="py-2 px-4 border-b">Peso</th>
-                      <th className="py-2 px-4 border-b">Sangre</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="py-2 px-4 border-b">Santiago</td>
-                      <td className="py-2 px-4 border-b">Burgos Molina</td>
-                      <td className="py-2 px-4 border-b">5</td>
-                      <td className="py-2 px-4 border-b">15/06/2024</td>
-                      <td className="py-2 px-4 border-b">Diabetes tipo 2</td>
-                      <td className="py-2 px-4 border-b">29 años</td>
-                      <td className="py-2 px-4 border-b">99567890</td>
-                      <td className="py-2 px-4 border-b">55 kg</td>
-                      <td className="py-2 px-4 border-b">O+</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b">Ana María</td>
-                      <td className="py-2 px-4 border-b">Lanza Paz</td>
-                      <td className="py-2 px-4 border-b">3</td>
-                      <td className="py-2 px-4 border-b">13/03/2024</td>
-                      <td className="py-2 px-4 border-b">Asma Bronquial</td>
-                      <td className="py-2 px-4 border-b">15 años</td>
-                      <td className="py-2 px-4 border-b">32786752</td>
-                      <td className="py-2 px-4 border-b">40 kg</td>
-                      <td className="py-2 px-4 border-b">O+</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b">Mario Rolando</td>
-                      <td className="py-2 px-4 border-b">Soto Ponce</td>
-                      <td className="py-2 px-4 border-b">2</td>
-                      <td className="py-2 px-4 border-b">28/07/2024</td>
-                      <td className="py-2 px-4 border-b">
-                        Hipertensión Arterial
-                      </td>
-                      <td className="py-2 px-4 border-b">54 años</td>
-                      <td className="py-2 px-4 border-b">97564223</td>
-                      <td className="py-2 px-4 border-b">82 kg</td>
-                      <td className="py-2 px-4 border-b">A+</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-4 border-b">Gabriela</td>
-                      <td className="py-2 px-4 border-b">Perez</td>
-                      <td className="py-2 px-4 border-b">6</td>
-                      <td className="py-2 px-4 border-b">23/05/2024</td>
-                      <td className="py-2 px-4 border-b">
-                        Insuficiencia Renal Crónica
-                      </td>
-                      <td className="py-2 px-4 border-b">29 años</td>
-                      <td className="py-2 px-4 border-b">98768965</td>
-                      <td className="py-2 px-4 border-b">70 kg</td>
-                      <td className="py-2 px-4 border-b">O+</td>
-                    </tr>
-                  </tbody>
-                </table>
+                {loading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <p>Cargando...</p>
+                  </div>
+                ) : expedientes.length > 0 ? (
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr>
+                        <th className="py-2 px-4 border-b">Nombres</th>
+                        <th className="py-2 px-4 border-b">Apellidos</th>
+                        <th className="py-2 px-4 border-b">Número de Citas</th>
+                        <th className="py-2 px-4 border-b">
+                          Fecha Última Consulta
+                        </th>
+                        <th className="py-2 px-4 border-b">
+                          Último Diagnóstico / Enfermedad
+                        </th>
+                        <th className="py-2 px-4 border-b">Edad</th>
+                        <th className="py-2 px-4 border-b">Teléfono</th>
+                        <th className="py-2 px-4 border-b">Peso lb</th>
+                        <th className="py-2 px-4 border-b">Sangre</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {expedientes.map((expediente, index) => (
+                        <tr key={index}>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Nombres || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Apellidos || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.ConsultasTotales || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.UltimaCita || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Diagnostico || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Edad || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Telefono || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.Peso || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {expediente.TipoSangre || "N/A"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p>No hay expedientes disponibles.</p>
+                  </div>
+                )}
               </div>
             </div>
           </main>
