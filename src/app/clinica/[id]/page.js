@@ -1,58 +1,138 @@
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable @next/next/no-img-element */
-"use client"; // Marcar este archivo como un Client Component
+"use client";
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import Link from "next/link";
-import { DocumentIcon } from "@heroicons/react/outline";
+import { useRouter } from "next/navigation";
 import Headerpages from "@/components/headerpagescopy";
 import Sidemenu from "@/components/sidemenu";
-import { GetExpedientes } from "@/services/expedientes";
+import {
+  GetExpedientes,
+  GetAcceso,
+  DeleteExpediente,
+} from "@/services/expedientes";
 
-export default function Pagina() {
+import Link from "next/link";
+import ConfirmModal from "@/components/ConfirmModal";
+
+export default function Pagina(props) {
+  const { id } = props.params;
   const [expedientes, setExpedientes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMedico, setLoadingMedico] = useState(true); // Nuevo estado para controlar la carga del idMedico
+  const [selectedRow, setSelectedRow] = useState(null); // Estado para la fila seleccionada
+  const [idMedico, setIdMedico] = useState(null);
+  const [selectedExpedienteId, setSelectedExpedienteId] = useState(null); // Nuevo estado para almacenar el ID del expediente seleccionado
+  const router = useRouter(); // useRouter ahora viene de next/navigation
+
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+  const [expedienteToDelete, setExpedienteToDelete] = useState(null); // Estado para el expediente a eliminar
 
   useEffect(() => {
-    const fetchExpedientes = async () => {
+    // Solo se ejecuta en el cliente
+    const storedIdMedico = localStorage.getItem("idMedico");
+    console.log("Stored ID Medico:", storedIdMedico); // Verifica si idMedico se guarda correctamente
+    setIdMedico(storedIdMedico);
+    setLoadingMedico(false);
+  }, []);
+
+  useEffect(() => {
+    if (loadingMedico || idMedico === null) return;
+
+    localStorage.removeItem("selectedExpedienteId");
+
+    const fetchAcceso = async () => {
       try {
-        const data = await GetExpedientes();
-        setExpedientes(data);
+        console.log("Fetching acceso for idMedico:", idMedico, "and id:", id);
+        const data = await GetAcceso(idMedico, id);
+        console.log("Acceso data:", data);
+
+        if (!data || data.length === 0) {
+          router.push("/404");
+          return;
+        }
+
+        await fetchExpedientes();
       } catch (error) {
-        console.error("Error fetching expedientes:", error);
+        console.error("Error fetching acceso:", error);
+        router.push("/404");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchExpedientes();
+    const fetchExpedientes = async () => {
+      try {
+        console.log("Fetching expedientes for id:", id);
+        const data = await GetExpedientes(id);
+        console.log("Expedientes data:", data);
+        setExpedientes(data);
+      } catch (error) {
+        console.error("Error fetching expedientes:", error);
+      }
+    };
+
+    fetchAcceso();
+  }, [loadingMedico, idMedico, id, router]);
+
+  useEffect(() => {
+    // Actualiza selectedExpedienteId cuando se carga el componente
+    const storedExpedienteId = localStorage.getItem("selectedExpedienteId");
+    setSelectedExpedienteId(storedExpedienteId);
   }, []);
 
-  const [selectedRow, setSelectedRow] = useState(null); // Estado para la fila seleccionada
-
   const handleRowClick = (expediente) => {
-    setSelectedRow(expediente); // Actualiza la fila seleccionada
+    setSelectedRow(expediente);
+    localStorage.setItem("selectedExpedienteId", expediente.idExpediente);
+    setSelectedExpedienteId(expediente.idExpediente); // También actualiza el estado
   };
 
-  const handleEditClick = () => {
-    if (selectedRow) {
-      // Lógica para manejar la edición de la fila seleccionada
-      console.log("Editar:", selectedRow);
+  const handleEditClick = (event) => {
+    const storedExpedienteId = localStorage.getItem("selectedExpedienteId");
+
+    if (!storedExpedienteId) {
+      event.preventDefault(); //evita que redireccione
+      alert("Por favor, seleccione un expediente antes de continuar.");
     } else {
-      console.log("No hay fila seleccionada.");
+      setSelectedExpedienteId(storedExpedienteId); // Asegúrate de que el estado se actualiza también
     }
+  };
+
+  const handleDeleteClick = (event) => {
+    event.preventDefault(); // Prevenir navegación por defecto
+    const storedExpedienteId = localStorage.getItem("selectedExpedienteId");
+
+    if (!storedExpedienteId) {
+      alert("Por favor, seleccione el expediente que desea eliminar.");
+    } else {
+      setExpedienteToDelete(storedExpedienteId);
+      setIsModalOpen(true); // Abrir el modal
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Eliminar expediente con ID:", expedienteToDelete);
+    DeleteExpediente(expedienteToDelete).then((response) => {
+      if (response.status != 200) {
+        alert("Error al eliminar expediente.");
+        return;
+      } else {
+        alert("Expediente eliminado con éxito.");
+        router.push("/");
+      }
+    });
   };
 
   return (
     <div>
-      {/* Barra de menú superior (1) - Posición fija */}
+      {/* Barra de menú superior */}
       <div className="fixed top-0 left-0 w-full h-16 bg-gray-800 text-white z-10">
         <Headerpages />
       </div>
 
-      {/* Contenedor principal (2) para el menú vertical (3) y el contenido de los videos (4) */}
+      {/* Contenedor principal */}
       <div className="flex pt-16">
-        {/* Menú vertical (3) - Oculto en pantallas pequeñas, visible en medianas y grandes */}
+        {/* Menú vertical */}
         <Sidemenu />
 
         {/* Contenido */}
@@ -63,9 +143,12 @@ export default function Pagina() {
               <div>Expedientes</div>
               {/* Div superior con botón y barra de búsqueda */}
               <div className="w-full flex justify-between items-center mb-4">
-                <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                <Link
+                  href={`/clinica/${id}/nuevo`}
+                  className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                >
                   Nuevo Expediente
-                </button>
+                </Link>
                 <div className="relative">
                   <input
                     type="text"
@@ -91,14 +174,14 @@ export default function Pagina() {
 
               {/* Div con botones de acción */}
               <div className="w-full flex justify-start space-x-4 mb-4">
-                <Link
-                  href="/eliminar"
+                <button
                   className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                  onClick={handleDeleteClick}
                 >
                   Eliminar
-                </Link>
+                </button>
                 <Link
-                  href="/editarPaciente"
+                  href={`/clinica/${id}/expediente/${selectedExpedienteId}`}
                   className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
                   onClick={handleEditClick}
                 >
@@ -197,6 +280,13 @@ export default function Pagina() {
           </main>
         </div>
       </div>
+      {/* Modal de Confirmación */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        expedienteId={expedienteToDelete}
+      />
     </div>
   );
 }
